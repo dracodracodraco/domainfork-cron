@@ -1,0 +1,20 @@
+name: Scheduler
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+    - cron: "0 22 * * *"
+    - cron: "23 23 * * 0-4"
+  workflow_dispatch: {}
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          case "${{ github.event.schedule }}" in
+            "0 22 * * *") S=2 ;;
+            "23 23 * * 0-4") S=3 ;;
+            *) S=1 ;;
+          esac
+          curl -sS --max-time 60 "https://domainfork.com/api/cron/tick?s=$S" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" || true
